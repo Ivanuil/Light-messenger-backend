@@ -1,5 +1,6 @@
 package edu.example.kafkatest.web.socket;
 
+import edu.example.kafkatest.web.security.UserDetailsImpl;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -18,7 +19,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
         session.sendMessage(new TextMessage("Connected!"));
-        System.out.println(session);
+        System.out.println("afterConnectionEstablished = " + session.getPrincipal());
     }
 
     @Override
