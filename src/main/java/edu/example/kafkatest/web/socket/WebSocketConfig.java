@@ -1,9 +1,7 @@
-package edu.example.kafkatest.web;
-
+package edu.example.kafkatest.web.socket;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
@@ -16,8 +14,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
 
     @Bean
-    public ServerWebSocketHandler webSocketHandler() {
-        return new ServerWebSocketHandler();
+    public WebSocketHandler webSocketHandler() {
+        return new WebSocketHandler();
     }
 
 }
