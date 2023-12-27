@@ -19,12 +19,12 @@ public class TokenService {
         this.tokenRepository = tokenRepository;
     }
 
-    public Token saveNewToken(String tokenValue, UserModel user) {
+    public void saveNewToken(String tokenValue, UserModel user) {
         Token token = new Token();
         token.setToken(tokenValue);
         token.setActive(true);
         token.setUser(user);
-        return tokenRepository.save(token);
+        tokenRepository.save(token);
     }
 
     public Optional<Token> findByTokenValue(String token) {

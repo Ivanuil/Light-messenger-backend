@@ -1,6 +1,5 @@
 package edu.example.kafkatest.web.socket;
 
-import edu.example.kafkatest.web.security.UserDetailsImpl;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
