@@ -1,18 +1,12 @@
 package edu.example.kafkatest.web.security;
 
 import edu.example.kafkatest.model.UserModel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-@Getter
-@RequiredArgsConstructor
-public class UserDetailsImpl implements UserDetails {
-
-    private final UserModel user;
+public record UserDetailsImpl(UserModel user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

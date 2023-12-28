@@ -1,23 +1,32 @@
 package edu.example.kafkatest.kafka;
 
-import edu.example.kafkatest.web.socket.WebSocketHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.example.kafkatest.dto.MessageDto;
+import edu.example.kafkatest.exception.EntityNotFoundException;
+import edu.example.kafkatest.service.MessageService;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
 public class KafkaMessageListener {
 
-    private final WebSocketHandler webSocketHandler;
+    private final MessageService messageService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public KafkaMessageListener(WebSocketHandler webSocketHandler) {
-        this.webSocketHandler = webSocketHandler;
+    public KafkaMessageListener(MessageService messageService) {
+        this.messageService = messageService;
     }
 
-    @org.springframework.kafka.annotation.KafkaListener(topics = "${spring.kafka.topic-name}",
+    @KafkaListener(topics = "${spring.kafka.topic-name}",
             groupId = "${spring.kafka.group-id}")
-    public void listenGroupMessages(String message) throws IOException {
-        webSocketHandler.sendMessage(message);
+    public void listenGroupMessages(String message) throws JsonProcessingException {
+        MessageDto messageDto = objectMapper.readValue(message, MessageDto.class);
+        try {
+            messageService.sendMessageToWebSocket(messageDto.getTo(),
+                    messageDto.getFrom(),
+                    messageDto.getText());
+        } catch (EntityNotFoundException ignored) {}
     }
 
 }

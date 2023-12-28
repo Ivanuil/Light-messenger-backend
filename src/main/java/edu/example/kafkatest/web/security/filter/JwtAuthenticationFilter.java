@@ -24,7 +24,6 @@ import java.util.Optional;
 
 import static edu.example.kafkatest.web.security.SecurityConstants.JWT_COOKIE_NAME;
 
-
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class AppExceptionHandler extends ResponseEntityExceptionHandler {
@@ -33,7 +34,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleException(DataIntegrityViolationException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("errors", List.of(ex.getRootCause().getMessage()));
+        body.put("errors", List.of(Objects.requireNonNull(ex.getRootCause()).getMessage()));
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
@@ -59,7 +60,7 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("errors",
                 ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                        .map(DefaultMessageSourceResolvable::getDefaultMessage).filter(Objects::nonNull)
                 .filter(s -> !s.isBlank())
                 .toList());
         return new ResponseEntity<>(body, status);

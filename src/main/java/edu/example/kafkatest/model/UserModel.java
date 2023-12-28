@@ -7,6 +7,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name="user", schema = "public")
 @Setter
@@ -19,5 +21,12 @@ public class UserModel {
 
     @Column
     private String password;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof UserModel userModel)) return false;
+        return Objects.equals(username, userModel.username);
+    }
 
 }
