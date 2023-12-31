@@ -30,7 +30,7 @@ public record UserDetailsImpl(UserModel user) implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
@@ -40,7 +40,7 @@ public record UserDetailsImpl(UserModel user) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 
 }

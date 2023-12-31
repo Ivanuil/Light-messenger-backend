@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "Message text!",
+					"raw": "{\r\n  \"to\": \"username\",\r\n  \"text\": \"Message text!\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -21,14 +21,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/",
+					"raw": "http://localhost:8080/send",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						""
+						"send"
 					]
 				}
 			},
@@ -50,7 +50,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"username\": \"username\",\n  \"password\": \"Password1!\"\n}"
+					"raw": "{\n  \"username\": \"123\",\n  \"password\": \"Pass123!\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/auth/register",

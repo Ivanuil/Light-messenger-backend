@@ -27,7 +27,7 @@ public class MessageController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @PostMapping
+    @PostMapping("/send")
     @Operation(description = "Sends message to kafka (if receiving user doesn't exist " +
             "or is offline the message will be lost)")
     public void sendMessage(@RequestBody MessageSendDto message,

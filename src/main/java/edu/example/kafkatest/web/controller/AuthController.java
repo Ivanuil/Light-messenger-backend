@@ -69,6 +69,7 @@ public class AuthController {
 
     private void addTokenCookieToResponse(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(SecurityConstants.JWT_COOKIE_NAME, token);
+        cookie.setSecure(false);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);

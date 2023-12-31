@@ -25,9 +25,14 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
         if (request instanceof ServletServerHttpRequest) {
             var headers = request.getHeaders();
-            String token = headers.getFirst(JWT_COOKIE_NAME);
-            if (token == null)
+            String token = headers.getFirst("Cookie");
+            if (token != null) {  // Searching for 'jwtToken=' cookie
+                token = token.replaceFirst(".*jwtToken=","");
+                if (token.indexOf(' ') > 0)
+                    token = token.substring(0, token.indexOf(' '));
+            } else {
                 return false;
+            }
             attributes.put(JWT_COOKIE_NAME, token);
         }
         return true;
