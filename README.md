@@ -1,38 +1,35 @@
-## KAFKA-TEST
+## Light-messenger
 
 ### About
 
-KAFKA-TEST это простой мессенджер использующий Kafka и WebSocket для доставки сообщений.
+Light-messenger это простой мессенджер использующий Kafka и WebSocket для доставки сообщений.
+
+<img src="misc/images/main_page.png" alt="Main page" width="350"/>
+
+<img src="misc/images/log_in_page.png" alt="Log in page" width="350"/>
+
+<img src="misc/images/chat_page.png" alt="Chat page" width="350"/>
+
+Благодаря использованию WebSocket пользователь получает сообщения без обновления страницы.
+Но отправка сообщений также возможно через Http запрос.
+
+### Stack
+
+* Spring Boot
+* Kafka
+* PostgreSQL
+* WebSocket
 
 ### How to run
 
 1. Запустить Zookeeper, Kafka и Postgres.
 
-    В [файле](util/docker-compose.yml) имеется готовая конфигурация для запуска в Docker.
-    В случае запуска иным образом возможно потребуется изменить URL и порты в [файле](src/main/resources/application.properties)
+    В [docker-compose.yml](util/docker-compose.yml) имеется готовая конфигурация для запуска в Docker.
+    В случае запуска иным образом возможно потребуется изменить URL и порты в [application.properties](src/main/resources/application.properties)
 
 2. Запустить сервис
 
-### How to use
+3. Запустить NodeJs сервер выполнив команду ```npm start```
+в директории /web
 
-На данный момент сервис не имеет веб интерфейса, доступ возможен с помощью запросов через Postman.
-
-В [файле](util/KafkaTest.postman_collection.json) имеется готовая для использования коллекция запросов.
-Подключение для получения сообщений происходит с помощью функции WebSocket Postman по Url ws://localhost:8080/websocket
-
-1. С помощью запроса 'Register new user' зарегистрировать нового пользователя. 
-В качестве ответа на запрос будет получен Cookie файл 'jwtToken', из него необходимо скопировать значение поля 'jwtToken'.
-
-2. Создать новое WebSocket подключение в Postman (Так как Postman не позволяет экспортировать WebSocket подключения,
-необходимо создать подключение вручную). В разделе 'Headers' создать пару ключ значение 
-'jwtToken' - 'ключ скопированный из Cookie файла'. Подключится к WebSocket. 
-
-3. Через WebSocket возможно отправить сообщение любому пользователю отправив JSON вида
-```
-{
-  "to": "username",
-  "text": "Message text!"
-}
-```
-
-4. В качестве альтернативы возможно отправить сообщение любому пользователю с помощью Http запроса 'SendMessage'
+4. Домашняя страница будет доступна по адресу http://127.0.0.1/
