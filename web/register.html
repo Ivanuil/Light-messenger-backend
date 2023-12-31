@@ -1,10 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         axios.defaults.withCredentials = true;
 
-        function login() {
+        function reg() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
@@ -12,7 +13,7 @@
                 username,
                 password
             }
-            axios.post('http://127.0.0.1:8080/auth/login', requestBody)
+            axios.post('http://127.0.0.1:8080/auth/register', requestBody)
                 .then((response) => {
                     if (response.status === 200)
                         window.location = "chat";
@@ -24,7 +25,7 @@
     </script>
 </head>
 <body>
-    <h1>Log in:</h1>
+    <h1>Register:</h1>
     <form>
         <label for="username">Username:</label>
         <input type="text" name="username" id="username"/>
@@ -32,7 +33,7 @@
         <label for="password">Password:</label>
         <input type="password" name="password" id="password"/>
         <br>
-        <input type="button" name="register" id="submit" value="Login" onclick="login()">
+        <input type="button" name="register" id="register" value="Login" onclick="reg()">
     </form>
 </body>
 </html>

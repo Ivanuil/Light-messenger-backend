@@ -39,7 +39,6 @@
                 const textBlock = document.createTextNode(messageObj.text);
                 messageBlock.appendChild(textBlock);
             } catch (e) {
-                console.log(e);
                 messageBlock.textContent += event.data;
             }
 
@@ -61,6 +60,8 @@
                 text
             }
             socket.send(JSON.stringify(requestBody));
+            document.getElementById("to_socket").value = "";
+            document.getElementById("messageEdit").value = "";
         }
     </script>
 </head>
