@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KafkaTestApplication {
+public class LightMessengerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(KafkaTestApplication.class, args);
+        SpringApplication.run(LightMessengerApplication.class, args);
     }
 
 }

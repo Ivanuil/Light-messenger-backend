@@ -24,7 +24,7 @@ public class TestKafkaTestApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.from(KafkaTestApplication::main).with(TestKafkaTestApplication.class).run(args);
+        SpringApplication.from(LightMessengerApplication::main).with(TestKafkaTestApplication.class).run(args);
     }
 
 }
