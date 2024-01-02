@@ -19,7 +19,7 @@ public class KafkaMessageListener {
     }
 
     @KafkaListener(topics = "${spring.kafka.topic-name}",
-            groupId = "${spring.kafka.group-id}")
+            groupId = "${spring.kafka.group-id}", autoStartup = "true")
     public void listenGroupMessages(String message) throws JsonProcessingException {
         MessageDto messageDto = objectMapper.readValue(message, MessageDto.class);
         try {
