@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Docker ###
+kafka.properties
+log4j.properties
+tools-log4j.properties
