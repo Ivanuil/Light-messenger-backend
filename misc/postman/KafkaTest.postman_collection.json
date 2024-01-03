@@ -50,7 +50,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"username\": \"123\",\n  \"password\": \"Pass123!\"\n}"
+					"raw": "{\n  \"username\": \"username\",\n  \"password\": \"Password\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/auth/register",
@@ -83,7 +83,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"username\": \"username\",\n  \"password\": \"Password1!\"\n}"
+					"raw": "{\n  \"username\": \"username\",\n  \"password\": \"Password\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/auth/login",
