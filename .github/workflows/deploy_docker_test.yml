@@ -1,0 +1,35 @@
+name: DockerDeploy
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Start containers
+        run: docker -f "docker-compose.yml" up
+
+      - name: Check Zookeeper running
+        run: if [ "$( docker container inspect -f '{{.State.Running}}' zookeeper )" = "false" ]; then return 1; fi
+
+      - name: Check Kafka running
+        run: if [ "$( docker container inspect -f '{{.State.Running}}' kafka )" = "false" ]; then return 1; fi
+
+      - name: Check Postgres running
+        run: if [ "$( docker container inspect -f '{{.State.Running}}' postgres )" = "false" ]; then return 1; fi
+
+      - name: Check Service running
+        run: if [ "$( docker container inspect -f '{{.State.Running}}' light-messenger-backend )" = "false" ]; then return 1; fi
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yml" down
