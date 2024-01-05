@@ -20,7 +20,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP-SEVERS=kafka:9092
 
   postgres:
-    image: postgres
+    image: postgres:14.7
     restart: always
     user: postgres
     volumes:

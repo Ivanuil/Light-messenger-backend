@@ -1,0 +1,52 @@
+name: DockerDeploy
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Start containers
+        run: docker compose up --detach
+
+      - name: Check Zookeeper running
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-zookeeper-1
+          contains: true
+          expected_result: PASSED
+
+      - name: Check Kafka running
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-kafka-1
+          contains: true
+          expected_result: PASSED
+
+      - name: Check Postgres running
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-postgres-1
+          contains: true
+          expected_result: PASSED
+
+      - name: Check Service running
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-light-messenger-backend-1
+          contains: true
+          expected_result: PASSED
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
