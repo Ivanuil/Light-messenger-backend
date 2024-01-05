@@ -1,8 +1,7 @@
 package edu.example.light_messenger.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.example.light_messenger.config.KafkaTestConfig;
-import edu.example.light_messenger.config.PostgresTestConfig;
+import edu.example.light_messenger.TestContextConfig;
 import edu.example.light_messenger.dto.AuthUserDto;
 import edu.example.light_messenger.dto.LoginRequestDto;
 import edu.example.light_messenger.dto.RegisterRequestDto;
@@ -17,10 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,12 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ContextConfiguration(initializers = {
-        PostgresTestConfig.Initializer.class,
-        KafkaTestConfig.Initializer.class})
-@AutoConfigureMockMvc
-class AuthControllerTest {
+class AuthControllerTest extends TestContextConfig {
 
     static final String PASSWORD = "1234qwerQkL*";
     static final String USERNAME = "username";
