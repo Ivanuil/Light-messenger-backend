@@ -12,23 +12,40 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
+
       - name: Checkout
         uses: actions/checkout@v1
 
       - name: Start containers
-        run: docker compose up
+        run: docker compose up --detach
 
       - name: Check Zookeeper running
-        run: if [ "$( docker container inspect -f '{{.State.Running}}' zookeeper )" = "false" ]; then return 1; fi
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-zookeeper-1
+          contains: true
+          expected_result: PASSED
 
       - name: Check Kafka running
-        run: if [ "$( docker container inspect -f '{{.State.Running}}' kafka )" = "false" ]; then return 1; fi
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-kafka-1
+          contains: true
+          expected_result: PASSED
 
       - name: Check Postgres running
-        run: if [ "$( docker container inspect -f '{{.State.Running}}' postgres )" = "false" ]; then return 1; fi
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-postgres-1
+          contains: true
+          expected_result: PASSED
 
       - name: Check Service running
-        run: if [ "$( docker container inspect -f '{{.State.Running}}' light-messenger-backend )" = "false" ]; then return 1; fi
+        uses: GuillaumeFalourd/assert-command-line-output@v2.2
+        with:
+          command_line: docker container inspect -f '{{.State.Running}}' light-messenger-backend-light-messenger-backend-1
+          contains: true
+          expected_result: PASSED
 
       - name: Stop containers
         if: always()
