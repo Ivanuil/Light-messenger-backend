@@ -1,5 +1,4 @@
 name: Build
-runs-on: self-hosted
 
 on:
   pull_request:
@@ -11,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 11
