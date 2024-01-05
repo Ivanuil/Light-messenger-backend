@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Start containers
-        run: docker -f "docker-compose.yml" up
+        run: docker compose up
 
       - name: Check Zookeeper running
         run: if [ "$( docker container inspect -f '{{.State.Running}}' zookeeper )" = "false" ]; then return 1; fi
@@ -32,4 +32,4 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker-compose -f "docker-compose.yml" down
+        run: docker compose down
