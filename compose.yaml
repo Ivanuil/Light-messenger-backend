@@ -17,6 +17,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_KAFKA_BOOTSTRAP-SEVERS=kafka:9092
 
   postgres:
     image: postgres
@@ -40,14 +41,15 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+    expose:
+      - "2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - "29092:29092"
-      - "9092:9092"
+      - "29092:29092"  # For connections outside from Docker network
+    expose:
+      - "9092"  # For connections from Docker network
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
