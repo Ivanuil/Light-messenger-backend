@@ -16,6 +16,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -73,6 +74,7 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
                 throw new WebSocketException(e.getMessage());
             }
         });
+	LoggerFactory.getLogger(MessageWebSocketHandler.class).info("Opened WebSocket connection");
     }
 
     @Override

@@ -8,6 +8,8 @@ import edu.example.light_messenger.service.MessageService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class KafkaMessageListener {
@@ -19,16 +21,18 @@ public class KafkaMessageListener {
         this.messageService = messageService;
     }
 
-    @KafkaListener(topics = "${spring.kafka.topic-name}",
-            groupId = "${spring.kafka.group-id}", autoStartup = "true")
-    public void listenGroupMessages(String message, Acknowledgment acknowledgment) throws JsonProcessingException {
-        MessageDto messageDto = objectMapper.readValue(message, MessageDto.class);
+    @KafkaListener(topics = "${spring.kafka.topic-name}", autoStartup = "true")
+    public void listenGroupMessages(ConsumerRecord<?, ?> cr,
+                                    Acknowledgment ack) throws JsonProcessingException {
+        MessageDto messageDto = objectMapper.readValue((String) cr.value(), MessageDto.class);;
         try {
             messageService.sendMessageToWebSocket(messageDto.getTo(),
                     messageDto.getFrom(),
                     messageDto.getText());
-            acknowledgment.acknowledge();
-        } catch (EntityNotFoundException ignored) {}
+            ack.acknowledge();
+        } catch (EntityNotFoundException ignored) {
+            LoggerFactory.getLogger(KafkaMessageListener.class).warn("No such user at this node");
+	}
     }
 
 }
