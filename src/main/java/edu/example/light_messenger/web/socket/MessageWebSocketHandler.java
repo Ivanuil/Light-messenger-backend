@@ -9,6 +9,7 @@ import edu.example.light_messenger.exception.WebSocketException;
 import edu.example.light_messenger.model.UserModel;
 import edu.example.light_messenger.repository.UserRepository;
 import edu.example.light_messenger.service.TokenService;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Logger logger = LoggerFactory.getLogger(MessageWebSocketHandler.class);
 
     @Value("${spring.kafka.topic-name}")
     private String topicName;
@@ -60,6 +63,7 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
 
         tokenService.findByTokenValue(token).ifPresentOrElse(tokenModel -> {
             sessions.put(tokenModel.getUser().getUsername(), session);
+            logger.info("Opened WebSocket connection with user: " + tokenModel.getUser().getUsername());
             try {
                 session.sendMessage(new TextMessage("Welcome " + tokenModel.getUser().getUsername() + "!"));
             } catch (IOException e) {
