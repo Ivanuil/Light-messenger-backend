@@ -50,6 +50,12 @@ public class MessageService {
         }
     }
 
+    /**
+     * Checks if user exists and then send message to kafka
+     * @param from sending user's username
+     * @param to receiving user's username
+     * @param text message text
+     */
     public void sendMessageToKafka(String from, String to, String text) throws JsonProcessingException {
         if (userRepository.findById(to).isEmpty())
             throw new EntityNotFoundException("No user with this username");
