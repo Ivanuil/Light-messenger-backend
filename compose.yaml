@@ -1,23 +1,31 @@
-version: '2'
+version: "3"
 
 services:
+
+  proxy:
+    build:
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - light-messenger-backend
 
   light-messenger-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+    deploy:
+      mode: replicated
+      replicas: 2
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_KAFKA_BOOTSTRAP-SEVERS=kafka:9092
+      - SPRING_PROFILES_ACTIVE=docker
 
   postgres:
     image: postgres:14.7
