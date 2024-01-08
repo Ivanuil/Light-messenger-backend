@@ -6,6 +6,7 @@ import edu.example.light_messenger.dto.MessageDto;
 import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.service.MessageService;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,12 +21,13 @@ public class KafkaMessageListener {
 
     @KafkaListener(topics = "${spring.kafka.topic-name}",
             groupId = "${spring.kafka.group-id}", autoStartup = "true")
-    public void listenGroupMessages(String message) throws JsonProcessingException {
+    public void listenGroupMessages(String message, Acknowledgment acknowledgment) throws JsonProcessingException {
         MessageDto messageDto = objectMapper.readValue(message, MessageDto.class);
         try {
             messageService.sendMessageToWebSocket(messageDto.getTo(),
                     messageDto.getFrom(),
                     messageDto.getText());
+            acknowledgment.acknowledge();
         } catch (EntityNotFoundException ignored) {}
     }
 
