@@ -4,11 +4,12 @@ services:
 
   proxy:
     build:
-      dockerfile: nginx/Dockerfile
+      dockerfile: config/nginx/Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-      - light-messenger-backend
+      light-messenger-backend:
+        condition: service_started
 
   light-messenger-backend:
     build:
@@ -17,8 +18,6 @@ services:
     deploy:
       mode: replicated
       replicas: 2
-    expose:
-      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,12 +68,34 @@ services:
     depends_on:
       - zookeeper
     volumes:
-      - ./:/etc/kafka
+      - kafka-data:/etc/kafka
     healthcheck:
       test: [ "CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list"]
       interval: 10s
       timeout: 5s
       retries: 10
 
+  grafana:
+    build:
+      dockerfile: 'config/grafana/Dockerfile'
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+
 volumes:
   db-data:
+  kafka-data:
+  prometheus-data:
+  grafana-data:

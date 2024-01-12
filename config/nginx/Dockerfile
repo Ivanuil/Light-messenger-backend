@@ -4,6 +4,6 @@ USER root
 
 WORKDIR /home
 
-COPY /nginx/nginx.conf /etc/nginx/nginx.conf
+COPY /config/nginx/nginx.conf /etc/nginx/nginx.conf
 
 CMD ["nginx"]
