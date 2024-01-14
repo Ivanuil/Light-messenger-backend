@@ -54,7 +54,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - "29092:29092"  # For connections outside from Docker network
+      - "29092:29092"  # For connections outside of Docker network
     expose:
       - "9092"  # For connections from Docker network
     environment:

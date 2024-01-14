@@ -24,7 +24,7 @@ public class MessageController {
             "or is offline the message will be lost)")
     public void sendMessage(@RequestBody MessageSendDto message,
                             @AuthenticationPrincipal UserDetailsImpl userDetails) throws JsonProcessingException {
-        messageService.sendMessageToKafka(userDetails.getUsername(),
+        messageService.sendMessage(userDetails.getUsername(),
                 message.getTo(),
                 message.getText());
     }

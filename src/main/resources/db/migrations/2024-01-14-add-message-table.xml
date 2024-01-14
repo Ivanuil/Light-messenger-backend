@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-01-14-add-message-table" author="ivanuil">
+
+        <createTable tableName="message">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="from_username" type="VARCHAR"/>
+            <column name="to_username" type="VARCHAR"/>
+            <column name="timestamp" type="TIMESTAMP"/>
+            <column name="text" type="VARCHAR"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="message"
+                                 baseColumnNames="to_username"
+                                 constraintName="fk_message_to"
+                                 referencedTableName="user"
+                                 referencedColumnNames="username"/>
+
+        <createIndex tableName="message" indexName="idx_message_from_to">
+            <column name="from_username"/>
+            <column name="from_username"/>
+        </createIndex>
+
+        <createSequence sequenceName="message_seq" startValue="1" incrementBy="1"/>
+
+    </changeSet>
+
+</databaseChangeLog>
