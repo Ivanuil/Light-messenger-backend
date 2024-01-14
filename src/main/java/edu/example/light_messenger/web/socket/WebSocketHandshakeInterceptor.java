@@ -14,10 +14,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
     /**
      * Retrieves token from headers and puts it into session's attributes
-     * @param request
-     * @param response
-     * @param wsHandler
-     * @param attributes
      * @return If connection should be established
      */
     @Override
