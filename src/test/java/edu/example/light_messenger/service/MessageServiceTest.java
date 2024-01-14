@@ -4,13 +4,19 @@ import edu.example.light_messenger.TestContextConfig;
 import edu.example.light_messenger.dto.RegisterRequestDto;
 import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.exception.UnprocessableEntityException;
+import edu.example.light_messenger.repository.MessageRepository;
 import edu.example.light_messenger.repository.TokenRepository;
 import edu.example.light_messenger.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MessageServiceTest extends TestContextConfig {
 
@@ -23,10 +29,13 @@ public class MessageServiceTest extends TestContextConfig {
     TokenRepository tokenRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    MessageRepository messageRepository;
 
     @BeforeEach
     @AfterEach
     public void clear() {
+        messageRepository.deleteAll();
         tokenRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -45,10 +54,41 @@ public class MessageServiceTest extends TestContextConfig {
         authService.register(user2);
 
         // when
-        Assertions.assertThrows(EntityNotFoundException.class, () ->
+        assertThrows(EntityNotFoundException.class, () ->
                 messageService.sendMessageToWebSocket(user1.getUsername(),
                         user2.getUsername(), "message text"),
                 "User offline");
+    }
+
+    @Test
+    void sendMessage() throws UnprocessableEntityException {
+        // given
+        var sender = new RegisterRequestDto();
+        sender.setUsername("user1");
+        sender.setPassword("pass1");
+        authService.register(sender);
+
+        var recipient = new RegisterRequestDto();
+        recipient.setUsername("user2");
+        recipient.setPassword("pass2");
+        authService.register(recipient);
+
+        // when
+        String messageText = "Message text!";
+        messageService.sendMessage(sender.getUsername(), recipient.getUsername(), messageText);
+
+        // then
+        var messagePage = messageService.getMessages(recipient.getUsername(), 0, 5);
+        assertEquals(1, messagePage.getTotalElements());
+        assertEquals(1, messagePage.getTotalPages());
+        var message = messagePage.get().findFirst().get();
+        assertEquals(recipient.getUsername(), message.getTo().getUsername());
+        assertEquals(sender.getUsername(), message.getFrom());
+        assertEquals(messageText, message.getText());
+        assertEquals(Timestamp.valueOf(LocalDateTime.now()).getTime(),
+                message.getTimestamp().getTime(),
+                100);
+
     }
 
 }
