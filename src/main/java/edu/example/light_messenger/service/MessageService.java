@@ -11,6 +11,9 @@ import edu.example.light_messenger.repository.UserRepository;
 import edu.example.light_messenger.web.socket.MessageWebSocketHandler;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -38,13 +41,15 @@ public class MessageService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Sends message to Kafka and then saves it to database
+     * @param to receiving user's username
+     * @param from sending user's username
+     * @param text message text
+     */
     public void sendMessage(String from, String to, String text) {
         sendMessageToKafka(from, to, text);
-        saveMessage(new MessageModel(0L, from, userRepository.getReferenceById(to), new Timestamp(0), text));
-    }
-
-    private void saveMessage(MessageModel message) {
-        messageRepository.save(message);
+        messageRepository.save(new MessageModel(0L, from, userRepository.getReferenceById(to), new Timestamp(0), text));
     }
 
     /**
@@ -80,6 +85,11 @@ public class MessageService {
                 to,
                 text);
         kafkaTemplate.send(topicName, to, objectMapper.writeValueAsString(messageDto));
+    }
+
+    public Page<MessageModel> getMessages(String to, int pageNumber, int pageSize) {
+        return messageRepository.findAllByTo_Username(to,
+                PageRequest.of(pageNumber, pageSize, Sort.by("timestamp")));
     }
 
 }

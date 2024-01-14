@@ -37,10 +37,8 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    @Value("${logging.sockets}")
+    @Value("${logging.sockets:false}")
     private boolean logSockets;
-    @Value("${logging.messages}")
-    private boolean logMessages;
     private final Logger logger = LoggerFactory.getLogger(MessageWebSocketHandler.class);
 
     @Value("${spring.kafka.topic-name}")
@@ -58,7 +56,7 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
 
     /**
      * Attempts to authorise user by token from session's attributes.
-     * @param session
+     * @param session WebSocket session
      * @throws WebSocketException if sending reply fails
      */
     @Override
