@@ -7,6 +7,7 @@ import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,9 @@ public class KafkaMessageListener {
 
     private final MessageService messageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${logging.messages:false}")
+    private boolean logMessages;
     private final Logger logger = LoggerFactory.getLogger(KafkaMessageListener.class);
 
     public KafkaMessageListener(MessageService messageService) {
@@ -31,7 +35,8 @@ public class KafkaMessageListener {
             messageService.sendMessageToWebSocket(messageDto.getTo(),
                     messageDto.getFrom(),
                     messageDto.getText());
-            logger.info("Received message for user connected to this instance (" + messageDto.getTo() + ")");
+            if (logMessages)
+                logger.info("Received message for user connected to this instance (" + messageDto.getTo() + ")");
             ack.acknowledge();
         } catch (EntityNotFoundException ignored) {}
     }

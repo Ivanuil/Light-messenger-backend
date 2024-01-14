@@ -6,7 +6,9 @@ import edu.example.light_messenger.dto.MessageReceiveDto;
 import edu.example.light_messenger.dto.MessageSendDto;
 import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.exception.WebSocketException;
+import edu.example.light_messenger.model.MessageModel;
 import edu.example.light_messenger.model.UserModel;
+import edu.example.light_messenger.repository.MessageRepository;
 import edu.example.light_messenger.repository.UserRepository;
 import edu.example.light_messenger.service.TokenService;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,18 +33,22 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${logging.sockets:false}")
+    private boolean logSockets;
     private final Logger logger = LoggerFactory.getLogger(MessageWebSocketHandler.class);
 
     @Value("${spring.kafka.topic-name}")
     private String topicName;
 
     public MessageWebSocketHandler(TokenService tokenService, UserRepository userRepository,
-                                   KafkaTemplate<String, String> kafkaTemplate) {
+                                   MessageRepository messageRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
+        this.messageRepository = messageRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -49,7 +56,7 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
 
     /**
      * Attempts to authorise user by token from session's attributes.
-     * @param session
+     * @param session WebSocket session
      * @throws WebSocketException if sending reply fails
      */
     @Override
@@ -61,29 +68,37 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
         }
         String token = (String) session.getAttributes().get(JWT_COOKIE_NAME);
 
-        tokenService.findByTokenValue(token).ifPresentOrElse(tokenModel -> {
+        var tokenOpt = tokenService.findByTokenValue(token);
+        if (tokenOpt.isPresent()) {
+            var tokenModel = tokenOpt.get();
             sessions.put(tokenModel.getUser().getUsername(), session);
-            logger.info("Opened WebSocket connection with user: " + tokenModel.getUser().getUsername());
+            if (logSockets)
+                logger.info("Opened WebSocket connection with user: " + tokenModel.getUser().getUsername());
             try {
                 session.sendMessage(new TextMessage("Welcome " + tokenModel.getUser().getUsername() + "!"));
             } catch (IOException e) {
                 throw new WebSocketException(e.getMessage());
             }
-        }, () -> {
+        } else {
             try {
                 session.sendMessage(new TextMessage("Unauthorised!"));
                 session.close(CloseStatus.POLICY_VIOLATION);
+                if (logSockets)
+                    logger.info("Prevented unauthorised connection");
             } catch (IOException e) {
                 throw new WebSocketException(e.getMessage());
             }
-        });
+        }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String token = (String) session.getAttributes().get(JWT_COOKIE_NAME);
+        String username = tokenService.findByTokenValue(token).get().getUser().getUsername();
         if (!status.equalsCode(CloseStatus.POLICY_VIOLATION))
-            sessions.remove(tokenService.findByTokenValue(token).get().getUser().getUsername());
+            sessions.remove(username);
+        if (logSockets)
+            logger.info("Closed WebSocket connection with user: " + username);
     }
 
     /**
@@ -105,12 +120,15 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        MessageDto messageDto = new MessageDto(
-                tokenService.findByTokenValue(token).get().getUser().getUsername(),
-                messageSendDto.getTo(),
-                messageSendDto.getText());
+        String from = tokenService.findByTokenValue(token).get().getUser().getUsername();
+        String to = messageSendDto.getTo();
+        String text = messageSendDto.getText();
+        MessageDto messageDto = new MessageDto(from, to, text);
         String json = objectMapper.writeValueAsString(messageDto);
         kafkaTemplate.send(topicName, json);
+
+        messageRepository.save(new MessageModel(0L, from,
+                userRepository.getReferenceById(to), new Timestamp(0), text));
     }
 
     /**

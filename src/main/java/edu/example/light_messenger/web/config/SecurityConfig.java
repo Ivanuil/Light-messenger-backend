@@ -36,7 +36,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final String[] ALLOWED_URL_PATTERNS = { "/auth/register", "/auth/login",
-            "/swagger-ui/**", "/v3/api-docs/**", "/websocket", "/websocket/info" };
+            "/swagger-ui/**", "/v3/api-docs/**", "/websocket", "/websocket/info",
+            "/actuator", "/actuator/health", "/actuator/prometheus" };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, LogoutSuccessHandler logoutHandler,

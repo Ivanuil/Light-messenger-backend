@@ -1,24 +1,31 @@
 package edu.example.light_messenger.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.example.light_messenger.dto.MessageDto;
 import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.exception.WebSocketException;
+import edu.example.light_messenger.model.MessageModel;
 import edu.example.light_messenger.model.UserModel;
+import edu.example.light_messenger.repository.MessageRepository;
 import edu.example.light_messenger.repository.UserRepository;
 import edu.example.light_messenger.web.socket.MessageWebSocketHandler;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 
 @Service
 public class MessageService {
 
     private final MessageWebSocketHandler webSocketHandler;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final MessageRepository messageRepository;
 
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -27,10 +34,22 @@ public class MessageService {
     private String topicName;
 
     public MessageService(MessageWebSocketHandler webSocketHandler,
-                          KafkaTemplate<String, String> kafkaTemplate, UserRepository userRepository) {
+                          KafkaTemplate<String, String> kafkaTemplate, MessageRepository messageRepository, UserRepository userRepository) {
         this.webSocketHandler = webSocketHandler;
         this.kafkaTemplate = kafkaTemplate;
+        this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+    }
+
+    /**
+     * Sends message to Kafka and then saves it to database
+     * @param to receiving user's username
+     * @param from sending user's username
+     * @param text message text
+     */
+    public void sendMessage(String from, String to, String text) {
+        sendMessageToKafka(from, to, text);
+        messageRepository.save(new MessageModel(0L, from, userRepository.getReferenceById(to), new Timestamp(0), text));
     }
 
     /**
@@ -56,7 +75,8 @@ public class MessageService {
      * @param to receiving user's username
      * @param text message text
      */
-    public void sendMessageToKafka(String from, String to, String text) throws JsonProcessingException {
+    @SneakyThrows
+    private void sendMessageToKafka(String from, String to, String text) {
         if (userRepository.findById(to).isEmpty())
             throw new EntityNotFoundException("No user with this username");
 
@@ -65,6 +85,11 @@ public class MessageService {
                 to,
                 text);
         kafkaTemplate.send(topicName, to, objectMapper.writeValueAsString(messageDto));
+    }
+
+    public Page<MessageModel> getMessages(String to, int pageNumber, int pageSize) {
+        return messageRepository.findAllByTo_Username(to,
+                PageRequest.of(pageNumber, pageSize, Sort.by("timestamp")));
     }
 
 }
