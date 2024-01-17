@@ -10,6 +10,7 @@ import edu.example.light_messenger.model.MessageModel;
 import edu.example.light_messenger.model.UserModel;
 import edu.example.light_messenger.repository.MessageRepository;
 import edu.example.light_messenger.repository.UserRepository;
+import edu.example.light_messenger.service.ChatService;
 import edu.example.light_messenger.service.TokenService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,9 +33,11 @@ import static edu.example.light_messenger.web.security.SecurityConstants.JWT_COO
 public class MessageWebSocketHandler extends TextWebSocketHandler {
 
     private final TokenService tokenService;
+    private final ChatService chatService;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${logging.sockets:false}")
@@ -44,9 +47,10 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
     @Value("${spring.kafka.topic-name}")
     private String topicName;
 
-    public MessageWebSocketHandler(TokenService tokenService, UserRepository userRepository,
+    public MessageWebSocketHandler(TokenService tokenService, ChatService chatService, UserRepository userRepository,
                                    MessageRepository messageRepository, KafkaTemplate<String, String> kafkaTemplate) {
         this.tokenService = tokenService;
+        this.chatService = chatService;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -122,13 +126,19 @@ public class MessageWebSocketHandler extends TextWebSocketHandler {
 
         String from = tokenService.findByTokenValue(token).get().getUser().getUsername();
         String to = messageSendDto.getTo();
+
+        var userFrom = userRepository.getReferenceById(from);
+        var userTo = userRepository.getReferenceById(to);
+
         String text = messageSendDto.getText();
         MessageDto messageDto = new MessageDto(from, to, text);
         String json = objectMapper.writeValueAsString(messageDto);
         kafkaTemplate.send(topicName, json);
 
-        messageRepository.save(new MessageModel(0L, from,
-                userRepository.getReferenceById(to), new Timestamp(0), text));
+        messageRepository.save(new MessageModel(0L,
+                chatService.findOrCreateChat(userFrom, userTo),
+                userFrom, userTo,
+                new Timestamp(0), text));
     }
 
     /**

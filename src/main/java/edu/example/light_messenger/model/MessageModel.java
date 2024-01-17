@@ -22,8 +22,13 @@ public class MessageModel {
     @SequenceGenerator(name = "message_seq", sequenceName = "message_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "from_username")
-    private String from;
+    @ManyToOne
+    @JoinColumn(name = "chat")
+    private ChatModel chat;
+
+    @ManyToOne
+    @JoinColumn(name = "from_username")
+    private UserModel from;
 
     @ManyToOne
     @JoinColumn(name = "to_username")

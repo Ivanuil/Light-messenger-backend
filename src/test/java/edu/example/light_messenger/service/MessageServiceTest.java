@@ -4,6 +4,7 @@ import edu.example.light_messenger.TestContextConfig;
 import edu.example.light_messenger.dto.RegisterRequestDto;
 import edu.example.light_messenger.exception.EntityNotFoundException;
 import edu.example.light_messenger.exception.UnprocessableEntityException;
+import edu.example.light_messenger.repository.ChatRepository;
 import edu.example.light_messenger.repository.MessageRepository;
 import edu.example.light_messenger.repository.TokenRepository;
 import edu.example.light_messenger.repository.UserRepository;
@@ -31,11 +32,14 @@ public class MessageServiceTest extends TestContextConfig {
     UserRepository userRepository;
     @Autowired
     MessageRepository messageRepository;
+    @Autowired
+    ChatRepository chatRepository;
 
     @BeforeEach
     @AfterEach
     public void clear() {
         messageRepository.deleteAll();
+        chatRepository.deleteAll();
         tokenRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -78,12 +82,14 @@ public class MessageServiceTest extends TestContextConfig {
         messageService.sendMessage(sender.getUsername(), recipient.getUsername(), messageText);
 
         // then
-        var messagePage = messageService.getMessages(recipient.getUsername(), 0, 5);
+        var messagePage = messageService.getMessages(
+                userRepository.getReferenceById(recipient.getUsername()),
+                sender.getUsername(),0, 5);
         assertEquals(1, messagePage.getTotalElements());
         assertEquals(1, messagePage.getTotalPages());
         var message = messagePage.get().findFirst().get();
         assertEquals(recipient.getUsername(), message.getTo().getUsername());
-        assertEquals(sender.getUsername(), message.getFrom());
+        assertEquals(sender.getUsername(), message.getFrom().getUsername());
         assertEquals(messageText, message.getText());
         assertEquals(Timestamp.valueOf(LocalDateTime.now()).getTime(),
                 message.getTimestamp().getTime(),

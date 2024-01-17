@@ -14,4 +14,4 @@ COPY src ./src
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s CMD curl --fail localhost:8080/actuator/health || exit 1
 
-CMD ["./mvnw", "spring-boot:run"]
+CMD ["./mvnw", "spring-boot:run", "-Djacoco.skip=true"]

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2024-01-16-add-chats" author="ivanuil">
+        
+        <createTable tableName="chat">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user1" type="VARCHAR"/>
+            <column name="user2" type="VARCHAR"/>
+        </createTable>
+
+        <createSequence sequenceName="chat_seq"
+                        startValue="1"
+                        incrementBy="1"/>
+
+        <addColumn tableName="message">
+            <column name="chat" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="message" baseColumnNames="from_username"
+                                 constraintName="fk_message_from_username"
+                                 referencedTableName="user"
+                                 referencedColumnNames="username"/>
+
+        <addForeignKeyConstraint baseTableName="message"
+                                 baseColumnNames="chat"
+                                 constraintName="fk_message_chat"
+                                 referencedTableName="chat"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="chat"
+                                 baseColumnNames="user1"
+                                 constraintName="fk_chat_user1"
+                                 referencedTableName="user"
+                                 referencedColumnNames="username"/>
+
+        <addForeignKeyConstraint baseTableName="chat"
+                                 baseColumnNames="user2"
+                                 constraintName="fk_chat_user2"
+                                 referencedTableName="user"
+                                 referencedColumnNames="username"/>
+
+        <createIndex tableName="chat" indexName="idx_chat_users">
+            <column name="user1"/>
+            <column name="user2"/>
+        </createIndex>
+
+        <addUniqueConstraint tableName="chat"
+                             columnNames="user1, user2"
+                             constraintName="ak_chat_users"/>
+
+    </changeSet>
+
+</databaseChangeLog>
